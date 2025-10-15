@@ -1,33 +1,6 @@
 <template>
   <div>
     <div class="container">
-      <q-btn
-        :label="t('pois.title')"
-        icon="layers"
-        color="white"
-        text-color="grey-10"
-        no-caps
-        class="layers bg-white"
-        size="12px"
-      >
-        <q-menu>
-          <q-list>
-            <template v-for="pois in poisOptions" :key="pois.value">
-              <q-item clickable>
-                <q-item-section>{{ pois.label }}</q-item-section>
-                <q-item-section side>
-                  <q-toggle
-                    v-model="showPoisMap[pois.value]"
-                    :color="pois.color"
-                    keep-color
-                    @update:model-value="onShowPoisMap(pois.value)"
-                  />
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-list>
-        </q-menu>
-      </q-btn>
       <div :id="mapId" :style="`--t-height: ${height || '400px'}`" class="mapview" />
       <div class="colors q-pa-sm bg-white text-grey-8 text-caption rounded-borders">
         <div class="row q-gutter-sm">
@@ -76,23 +49,6 @@ let marker: Marker | undefined
 const isochronesData = ref<GeoJSON.FeatureCollection>()
 const selectedModeCutoffSec = ref<number[]>([]) // in seconds
 
-const poisOptions = computed(() =>
-  ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
-    label: t(`pois.categories.${cat}`),
-    value: cat,
-    color: categoryToColor(cat)?.name || 'grey-8',
-  })),
-)
-const showPoisMap = ref<{ [key: string]: boolean }>({
-  food: false,
-  education: false,
-  service: false,
-  health: false,
-  leisure: false,
-  transport: false,
-  commerce: false,
-})
-
 onMounted(onInit)
 
 watch(
@@ -120,6 +76,18 @@ watch(
     }
     if (toUpdate) {
       loadIsochronesData()
+    }
+  },
+)
+
+watch(
+  () => [isoService.updatedPoiSelection, isoService.selectedPois],
+  () => {
+    if (isoService.updatedPoiSelection && isoService.updatedPoiSelection.length > 0) {
+      const category = isoService.updatedPoiSelection.split(':')[0]
+      if (category && category.length > 0) {
+        onUpdatePoiLayer(category)
+      }
     }
   },
 )
@@ -199,7 +167,7 @@ async function loadIsochronesData() {
         showIsochrones(isochronesData.value)
         if (data?.isochrones.bbox) {
           // load POIs in the current map bbox
-          const selected = Object.entries(showPoisMap.value)
+          const selected = Object.entries(isoService.selectedPois)
             .filter(([, v]) => v)
             .map(([k]) => k)
           if (selected.length > 0) {
@@ -217,13 +185,13 @@ async function loadIsochronesData() {
 }
 
 function removePois() {
-  // reset showPoisMap
-  Object.keys(showPoisMap.value).forEach((key) => {
-    showPoisMap.value[key] = false
+  // reset selectedPois
+  Object.keys(isoService.selectedPois).forEach((key) => {
+    isoService.selectedPois[key] = false
   })
 
   if (!map.value) return
-  poisOptions.value.forEach((cat) => {
+  isoService.poisOptions.forEach((cat) => {
     const layerId = `pois-layer-${cat.value}`
     if (map.value && map.value.getLayer(layerId)) {
       map.value.removeLayer(layerId)
@@ -278,7 +246,7 @@ function showIsochrones(geojson: GeoJSON.FeatureCollection) {
     })
   }
   // remove pois layers if any
-  poisOptions.value.forEach((cat) => {
+  isoService.poisOptions.forEach((cat) => {
     const layerId = `pois-layer-${cat.value}`
     if (map.value?.getLayer(layerId)) {
       map.value.removeLayer(layerId)
@@ -298,7 +266,7 @@ function showPois(geojson: GeoJSON.FeatureCollection) {
         feature.properties.value as string,
       )
       feature.properties.category = cat
-      feature.properties.color = categoryToColor(cat)?.hex || '#000000'
+      feature.properties.color = isoService.categoryToColor(cat)?.hex || '#000000'
     } else if (feature.properties) {
       feature.properties.color = '#000000'
     }
@@ -336,14 +304,14 @@ function showPois(geojson: GeoJSON.FeatureCollection) {
         },
       })
       // hide if not selected
-      if (map.value?.getLayer(layerId) && !showPoisMap.value[cat]) {
+      if (map.value?.getLayer(layerId) && !isoService.selectedPois[cat]) {
         map.value.setLayoutProperty(layerId, 'visibility', 'none')
       }
     }
   })
 }
 
-function onShowPoisMap(name: string) {
+function onUpdatePoiLayer(name: string) {
   if (!map.value) return
   const layerId = `pois-layer-${name}`
   const hasLayer = map.value.getLayer(layerId) !== undefined
@@ -357,7 +325,7 @@ function onShowPoisMap(name: string) {
     return
   }
   // show/hide layer
-  if (showPoisMap.value[name]) {
+  if (isoService.selectedPois[name]) {
     if (map.value.getLayer(layerId)) {
       map.value.setLayoutProperty(layerId, 'visibility', 'visible')
     }
@@ -365,21 +333,6 @@ function onShowPoisMap(name: string) {
     if (map.value.getLayer(layerId)) {
       map.value.setLayoutProperty(layerId, 'visibility', 'none')
     }
-  }
-}
-
-function categoryToColor(str: string): { name: string; hex: string } | undefined {
-  const mapColors: { [key: string]: { name: string; hex: string } } = {
-    food: { name: 'red-9', hex: '#c62828' },
-    education: { name: 'purple-9', hex: '#6a1b9a' },
-    service: { name: 'blue-8', hex: '#1976d2' },
-    health: { name: 'green-13', hex: '#00e676' },
-    leisure: { name: 'light-green-9', hex: '#558b2f' },
-    transport: { name: 'yellow-8', hex: '#fbc02d' },
-    commerce: { name: 'pink-4', hex: '#f06292' },
-  }
-  if (str in mapColors && mapColors[str]) {
-    return mapColors[str]
   }
 }
 

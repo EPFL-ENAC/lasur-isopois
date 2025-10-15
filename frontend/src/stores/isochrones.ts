@@ -122,9 +122,29 @@ export const CATEGORY_TAGS = {
 }
 
 export const useIsochrones = defineStore('isochrones', () => {
+  const { t } = useI18n()
+
   const mode = ref<string>('WALK')
   const origin = ref<[number, number]>([6.57, 46.52]) // EPFL
   const loadingIsochrones = ref(false)
+  const selectedPois = ref<{ [key: string]: boolean }>({
+    food: false,
+    education: false,
+    service: false,
+    health: false,
+    leisure: false,
+    transport: false,
+    commerce: false,
+  })
+  const updatedPoiSelection = ref<string>('')
+
+  const poisOptions = computed(() =>
+    ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
+      label: t(`pois.categories.${cat}`),
+      value: cat,
+      color: categoryToColor(cat)?.name || 'grey-8',
+    })),
+  )
 
   function getModes() {
     return api
@@ -172,5 +192,32 @@ export const useIsochrones = defineStore('isochrones', () => {
     return 'other'
   }
 
-  return { mode, origin, loadingIsochrones, computeIsochrones, findCategory, getModes, getPois }
+  function categoryToColor(str: string): { name: string; hex: string } | undefined {
+    const mapColors: { [key: string]: { name: string; hex: string } } = {
+      food: { name: 'red-9', hex: '#c62828' },
+      education: { name: 'purple-9', hex: '#6a1b9a' },
+      service: { name: 'blue-8', hex: '#1976d2' },
+      health: { name: 'green-13', hex: '#00e676' },
+      leisure: { name: 'light-green-9', hex: '#558b2f' },
+      transport: { name: 'yellow-8', hex: '#fbc02d' },
+      commerce: { name: 'pink-4', hex: '#f06292' },
+    }
+    if (str in mapColors && mapColors[str]) {
+      return mapColors[str]
+    }
+  }
+
+  return {
+    mode,
+    origin,
+    loadingIsochrones,
+    selectedPois,
+    updatedPoiSelection,
+    poisOptions,
+    computeIsochrones,
+    findCategory,
+    getModes,
+    getPois,
+    categoryToColor,
+  }
 })
