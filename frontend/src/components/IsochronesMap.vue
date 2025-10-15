@@ -2,7 +2,7 @@
   <div>
     <div class="container">
       <q-btn
-        :label="t('record.pois')"
+        :label="t('pois.title')"
         icon="layers"
         color="white"
         text-color="grey-10"
@@ -39,7 +39,7 @@
             <div
               :style="`width: 15px; height: 15px; background-color: rgba(90, 63, 192, ${cutoffSecTransparency(index)}); border: 1px solid #5a3fc0; margin-right: 5px;`"
             ></div>
-            <div>{{ t('record.minutes', { count: Math.floor(cutoff / 60) }) }}</div>
+            <div>{{ t('pois.minutes', { count: Math.floor(cutoff / 60) }) }}</div>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ const selectedModeCutoffSec = ref<number[]>([]) // in seconds
 
 const poisOptions = computed(() =>
   ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
-    label: t(`record.categories.${cat}`),
+    label: t(`pois.categories.${cat}`),
     value: cat,
     color: categoryToColor(cat)?.name || 'grey-8',
   })),

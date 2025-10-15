@@ -42,7 +42,7 @@ const location = ref<AddressLocation>({ address: '' })
 
 const modeOptions = computed(() => {
   return ['WALK', 'BIKE', 'EBIKE'].map((m) => {
-    return { label: t(`record.mode.${m.toLowerCase()}`), value: m }
+    return { label: t(`pois.mode.${m.toLowerCase()}`), value: m }
   })
 })
 
