@@ -139,7 +139,7 @@ export const useIsochrones = defineStore('isochrones', () => {
 
   function computeIsochrones(payload: IsochronesParams) {
     return api
-      .post('/isochrones/compute', payload)
+      .post('/isochrones/_compute', payload)
       .then((res) => {
         return res.data as IsochronesData
       })
@@ -150,7 +150,7 @@ export const useIsochrones = defineStore('isochrones', () => {
 
   function getPois(payload: PoisParams) {
     return api
-      .post('/isochrones/pois', payload)
+      .post('/isochrones/_pois', payload)
       .then((res) => {
         return res.data as GeoJSON.FeatureCollection
       })

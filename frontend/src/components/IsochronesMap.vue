@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="modeOptions.length > 1" class="row q-mb-md">
+    <div v-if="modeOptions.length > 1" class="row q-col-gutter-md q-mb-md">
       <q-select
         label="Mode"
         v-model="selectedMode"
@@ -15,6 +15,11 @@
         hide-dropdown-icon
         style="min-width: 300px"
         @update:model-value="loadIsochronesData"
+      />
+      <address-input
+        v-model="location"
+        :label="t('location')"
+        @update:model-value="onLocationUpdate"
       />
     </div>
     <div class="container">
@@ -75,6 +80,8 @@ import {
 } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { style } from 'src/utils/maps'
+import type { AddressLocation } from 'src/components/models'
+import AddressInput from 'src/components/AddressInput.vue'
 
 const isoService = useIsochrones()
 
@@ -95,6 +102,9 @@ const loadingIsochrones = ref(false)
 const isochronesData = ref<GeoJSON.FeatureCollection>()
 const selectedMode = ref<string>('WALK')
 const selectedModeCutoffSec = ref<number[]>([]) // in seconds
+const origin = ref<[number, number]>(props.center)
+const location = ref<AddressLocation>({ address: '' })
+
 const modeOptions = computed(() => {
   return ['WALK', 'BIKE', 'EBIKE'].map((m) => {
     return { label: t(`record.mode.${m.toLowerCase()}`), value: m }
@@ -120,9 +130,12 @@ const showPoisMap = ref<{ [key: string]: boolean }>({
 onMounted(onInit)
 
 function onInit() {
+  if (props.center) {
+    origin.value = props.center
+  }
   map.value = new Map({
     container: props.mapId,
-    center: props.center,
+    center: origin.value,
     style: style,
     trackResize: true,
     zoom: props.zoom || 14,
@@ -137,7 +150,7 @@ function onInit() {
         '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
     }),
   )
-  marker = new Marker().setLngLat([props.center[0], props.center[1]])
+  marker = new Marker().setLngLat([origin.value[0], origin.value[1]])
   marker.addTo(map.value)
   loadIsochrones()
 }
@@ -148,9 +161,11 @@ function loadIsochrones() {
 }
 
 async function loadIsochronesData() {
+  removeIsochrones()
+  removePois()
   loadingIsochrones.value = true
-  const lon = props.center[0]
-  const lat = props.center[1]
+  const lon = origin.value[0]
+  const lat = origin.value[1]
   let cutoffSec = []
   let mode = 'WALK'
   let bikeSpeed = 13
@@ -206,6 +221,22 @@ async function loadIsochronesData() {
     })
 }
 
+function removePois() {
+  // reset showPoisMap
+  Object.keys(showPoisMap.value).forEach((key) => {
+    showPoisMap.value[key] = false
+  })
+
+  if (!map.value) return
+  poisOptions.value.forEach((cat) => {
+    const layerId = `pois-layer-${cat.value}`
+    if (map.value && map.value.getLayer(layerId)) {
+      map.value.removeLayer(layerId)
+      map.value.removeSource(layerId)
+    }
+  })
+}
+
 async function loadPois(categories: string[]) {
   if (!map.value) return
   if (!isochronesData.value || !isochronesData.value.bbox) return
@@ -219,6 +250,16 @@ async function loadPois(categories: string[]) {
     showPois(data)
   }
   loadingIsochrones.value = false
+}
+
+function removeIsochrones() {
+  if (!map.value) return
+  if (map.value.getSource('isochrones')) {
+    if (map.value.getLayer('isochrones-layer')) {
+      map.value.removeLayer('isochrones-layer')
+    }
+    map.value.removeSource('isochrones')
+  }
 }
 
 function showIsochrones(geojson: GeoJSON.FeatureCollection) {
@@ -350,6 +391,25 @@ function categoryToColor(str: string): { name: string; hex: string } | undefined
 function cutoffSecTransparency(index: number): number {
   const total = selectedModeCutoffSec.value.length
   return 0.1 + (0.7 * (total - index + 1)) / total
+}
+
+function onLocationUpdate(newLocation: AddressLocation) {
+  if (newLocation.lat !== undefined && newLocation.lon !== undefined) {
+    if (newLocation.lat === origin.value[1] && newLocation.lon === origin.value[0]) {
+      return
+    }
+    origin.value = [newLocation.lon, newLocation.lat]
+    if (map.value) {
+      map.value.setCenter(origin.value)
+      if (marker) {
+        marker.setLngLat(origin.value)
+      } else {
+        marker = new Marker().setLngLat(origin.value)
+        marker.addTo(map.value)
+      }
+      loadIsochronesData()
+    }
+  }
 }
 </script>
 

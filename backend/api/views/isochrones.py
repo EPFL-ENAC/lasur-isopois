@@ -22,7 +22,7 @@ async def get_modes(api_key: str = Security(get_api_key)) -> Dict[str, str]:
     return available_modes
 
 
-@router.post("/compute", response_model=IsochroneResponse, response_model_exclude_none=True)
+@router.post("/_compute", response_model=IsochroneResponse, response_model_exclude_none=True)
 async def compute_isochrones(
     data: IsochronePoisData,
     # api_key: str = Security(get_api_key),
@@ -84,7 +84,7 @@ async def compute_isochrones(
         return IsochroneResponse(isochrones=FeatureCollection(type="FeatureCollection", features=[]), pois=None)
 
 
-@router.post("/pois", response_model=FeatureCollection, response_model_exclude_none=True)
+@router.post("/_pois", response_model=FeatureCollection, response_model_exclude_none=True)
 async def get_pois(
     data: PoisData,
     # api_key: str = Security(get_api_key),

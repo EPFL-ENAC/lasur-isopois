@@ -33,26 +33,7 @@
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item clickable :to="'/'">
-          <q-item-section avatar>
-            <q-icon name="dashboard" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label header>{{ t('dashboard') }}</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item-label class="text-h6" header>{{ t('help') }}</q-item-label>
-        <q-item clickable :to="'/cookbook'">
-          <q-item-section avatar>
-            <q-icon name="fa-solid fa-bowl-rice" size="xs" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label header>{{ t('cookbook') }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
+      <q-list> </q-list>
     </q-drawer>
 
     <q-page-container>
