@@ -6,7 +6,7 @@ The IsoPois project is a web application designed to manage and visualize geospa
 
 ## Environment 
 
-What the .env file should look like for the PLATYP backend:
+What the .env file should look like for the ISOPOIS backend:
 
 ```sh
 # FastAPI prefix
