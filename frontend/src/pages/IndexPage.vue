@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div class="q-pa-md">
+    <div>
       <dashboard-panel />
     </div>
   </q-page>

@@ -122,6 +122,10 @@ export const CATEGORY_TAGS = {
 }
 
 export const useIsochrones = defineStore('isochrones', () => {
+  const mode = ref<string>('WALK')
+  const origin = ref<[number, number]>([6.57, 46.52]) // EPFL
+  const loadingIsochrones = ref(false)
+
   function getModes() {
     return api
       .get('/isochrones/modes')
@@ -168,5 +172,5 @@ export const useIsochrones = defineStore('isochrones', () => {
     return 'other'
   }
 
-  return { computeIsochrones, findCategory, getModes, getPois }
+  return { mode, origin, loadingIsochrones, computeIsochrones, findCategory, getModes, getPois }
 })

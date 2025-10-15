@@ -1,27 +1,5 @@
 <template>
   <div>
-    <div v-if="modeOptions.length > 1" class="row q-col-gutter-md q-mb-md">
-      <q-select
-        label="Mode"
-        v-model="selectedMode"
-        :loading="loadingIsochrones"
-        :disable="loadingIsochrones"
-        :options="modeOptions"
-        option-value="value"
-        option-label="label"
-        filled
-        emit-value
-        map-options
-        hide-dropdown-icon
-        style="min-width: 300px"
-        @update:model-value="loadIsochronesData"
-      />
-      <address-input
-        v-model="location"
-        :label="t('location')"
-        @update:model-value="onLocationUpdate"
-      />
-    </div>
     <div class="container">
       <q-btn
         :label="t('record.pois')"
@@ -80,13 +58,10 @@ import {
 } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { style } from 'src/utils/maps'
-import type { AddressLocation } from 'src/components/models'
-import AddressInput from 'src/components/AddressInput.vue'
 
 const isoService = useIsochrones()
 
 interface Props {
-  center: [number, number]
   height?: string
   zoom?: number
   mapId: string
@@ -98,18 +73,9 @@ const { t } = useI18n()
 
 const map = ref<Map>()
 let marker: Marker | undefined
-const loadingIsochrones = ref(false)
 const isochronesData = ref<GeoJSON.FeatureCollection>()
-const selectedMode = ref<string>('WALK')
 const selectedModeCutoffSec = ref<number[]>([]) // in seconds
-const origin = ref<[number, number]>(props.center)
-const location = ref<AddressLocation>({ address: '' })
 
-const modeOptions = computed(() => {
-  return ['WALK', 'BIKE', 'EBIKE'].map((m) => {
-    return { label: t(`record.mode.${m.toLowerCase()}`), value: m }
-  })
-})
 const poisOptions = computed(() =>
   ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
     label: t(`record.categories.${cat}`),
@@ -129,13 +95,39 @@ const showPoisMap = ref<{ [key: string]: boolean }>({
 
 onMounted(onInit)
 
+watch(
+  () => [isoService.origin, isoService.mode],
+  () => {
+    let toUpdate = false
+    if (
+      isoService.origin &&
+      isoService.origin[0] !== undefined &&
+      isoService.origin[1] !== undefined
+    ) {
+      if (map.value) {
+        map.value.setCenter(isoService.origin)
+        if (marker) {
+          marker.setLngLat(isoService.origin)
+        } else {
+          marker = new Marker().setLngLat(isoService.origin)
+          marker.addTo(map.value)
+        }
+        toUpdate = true
+      }
+    }
+    if (isoService.mode !== undefined) {
+      toUpdate = true
+    }
+    if (toUpdate) {
+      loadIsochronesData()
+    }
+  },
+)
+
 function onInit() {
-  if (props.center) {
-    origin.value = props.center
-  }
   map.value = new Map({
     container: props.mapId,
-    center: origin.value,
+    center: isoService.origin,
     style: style,
     trackResize: true,
     zoom: props.zoom || 14,
@@ -150,8 +142,11 @@ function onInit() {
         '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
     }),
   )
-  marker = new Marker().setLngLat([origin.value[0], origin.value[1]])
+  marker = new Marker().setLngLat([isoService.origin[0], isoService.origin[1]])
   marker.addTo(map.value)
+  map.value.on('click', (e) => {
+    isoService.origin = [e.lngLat.lng, e.lngLat.lat]
+  })
   loadIsochrones()
 }
 
@@ -163,13 +158,13 @@ function loadIsochrones() {
 async function loadIsochronesData() {
   removeIsochrones()
   removePois()
-  loadingIsochrones.value = true
-  const lon = origin.value[0]
-  const lat = origin.value[1]
+  isoService.loadingIsochrones = true
+  const lon = isoService.origin[0]
+  const lat = isoService.origin[1]
   let cutoffSec = []
   let mode = 'WALK'
   let bikeSpeed = 13
-  switch (selectedMode.value) {
+  switch (isoService.mode) {
     case 'WALK':
       mode = 'WALK'
       cutoffSec = [600, 1200, 1800, 2400, 3600]
@@ -217,7 +212,7 @@ async function loadIsochronesData() {
       console.error('Error computing isochrones', err)
     })
     .finally(() => {
-      loadingIsochrones.value = false
+      isoService.loadingIsochrones = false
     })
 }
 
@@ -241,7 +236,7 @@ async function loadPois(categories: string[]) {
   if (!map.value) return
   if (!isochronesData.value || !isochronesData.value.bbox) return
   const bbox = isochronesData.value.bbox as [number, number, number, number]
-  loadingIsochrones.value = true
+  isoService.loadingIsochrones = true
   const data = await isoService.getPois({
     categories,
     bbox,
@@ -249,7 +244,7 @@ async function loadPois(categories: string[]) {
   if (data) {
     showPois(data)
   }
-  loadingIsochrones.value = false
+  isoService.loadingIsochrones = false
 }
 
 function removeIsochrones() {
@@ -391,25 +386,6 @@ function categoryToColor(str: string): { name: string; hex: string } | undefined
 function cutoffSecTransparency(index: number): number {
   const total = selectedModeCutoffSec.value.length
   return 0.1 + (0.7 * (total - index + 1)) / total
-}
-
-function onLocationUpdate(newLocation: AddressLocation) {
-  if (newLocation.lat !== undefined && newLocation.lon !== undefined) {
-    if (newLocation.lat === origin.value[1] && newLocation.lon === origin.value[0]) {
-      return
-    }
-    origin.value = [newLocation.lon, newLocation.lat]
-    if (map.value) {
-      map.value.setCenter(origin.value)
-      if (marker) {
-        marker.setLngLat(origin.value)
-      } else {
-        marker = new Marker().setLngLat(origin.value)
-        marker.addTo(map.value)
-      }
-      loadIsochronesData()
-    }
-  }
 }
 </script>
 

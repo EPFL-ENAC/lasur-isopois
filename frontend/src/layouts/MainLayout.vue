@@ -33,7 +33,7 @@
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list> </q-list>
+      <left-drawer class="q-mt-md" />
     </q-drawer>
 
     <q-page-container>
@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { Cookies } from 'quasar'
 import { locales } from 'boot/i18n'
+import LeftDrawer from 'src/components/LeftDrawer.vue'
 
 const { locale, t } = useI18n()
 
