@@ -21,6 +21,10 @@ export default {
     },
     minutes: '{count} min',
   },
+  francetravail: {
+    query: 'Job name or ROME code',
+    input_hint: 'Type Enter to start the search.',
+  },
   transport_mode: 'Transport Mode',
   address_input_hint: 'Type Enter to lookup addresses.',
   go_home: 'Go Home',

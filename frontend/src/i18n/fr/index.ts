@@ -21,6 +21,10 @@ export default {
     },
     minutes: '{count} min',
   },
+  francetravail: {
+    query: 'Nom du poste ou code ROME',
+    input_hint: 'Tapez Entrée pour lancer la recherche.',
+  },
   transport_mode: 'Mode de transport',
   address_input_hint: "Tapez Entrée pour rechercher l'adresse.",
   go_home: 'Accueil',

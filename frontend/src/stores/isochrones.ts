@@ -1,5 +1,13 @@
 import { api } from 'src/boot/api'
-import type { IsochronesParams, IsochronesData, IsochronesModes, PoisParams } from 'src/models'
+import type {
+  IsochronesParams,
+  IsochronesData,
+  IsochronesModes,
+  PoisParams,
+  RomeCodeResponse,
+  JobsResponse,
+} from 'src/models'
+import type { AxiosResponse } from 'axios'
 
 export const CATEGORY_TAGS = {
   food: {
@@ -137,6 +145,7 @@ export const useIsochrones = defineStore('isochrones', () => {
     commerce: false,
   })
   const updatedPoiSelection = ref<string>('')
+  const query = ref('')
 
   const poisOptions = computed(() =>
     ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
@@ -172,11 +181,56 @@ export const useIsochrones = defineStore('isochrones', () => {
       })
   }
 
-  function getOsmPois(payload: PoisParams) {
+  async function getOsmPois(payload: PoisParams) {
     return api
       .post('/osm/_pois', payload)
       .then((res) => {
         return res.data as GeoJSON.FeatureCollection
+      })
+      .catch(() => {
+        return undefined
+      })
+  }
+
+  async function getRomeCodes(query: string): Promise<RomeCodeResponse | undefined> {
+    return api
+      .get<RomeCodeResponse>('/francetravail/_codes', { params: { query } })
+      .then((res: AxiosResponse<RomeCodeResponse>) => {
+        return res.data
+      })
+      .catch(() => {
+        return undefined
+      })
+  }
+
+  async function getJobs(query: string): Promise<JobsResponse | undefined> {
+    if (!query || query.trim().length === 0) {
+      return undefined
+    }
+    // check if it is a ROME code
+    if (/^[A-Z]\d{4}$/.test(query.trim().toUpperCase())) {
+      return api
+        .get<JobsResponse>('/francetravail/_jobs', {
+          params: { rome_codes: JSON.stringify([query.trim().toUpperCase()]) },
+        })
+        .then((res: AxiosResponse<JobsResponse>) => {
+          return res.data
+        })
+        .catch(() => {
+          return undefined
+        })
+    }
+    // else search ROME codes from query
+    const rome_codes = await getRomeCodes(query)
+    if (!rome_codes || !rome_codes.codes || rome_codes.codes.length === 0) {
+      return undefined
+    }
+    return api
+      .get<JobsResponse>('/francetravail/_jobs', {
+        params: { rome_codes: JSON.stringify(rome_codes?.codes) },
+      })
+      .then((res: AxiosResponse<JobsResponse>) => {
+        return res.data
       })
       .catch(() => {
         return undefined
@@ -214,10 +268,13 @@ export const useIsochrones = defineStore('isochrones', () => {
     selectedPois,
     updatedPoiSelection,
     poisOptions,
+    query,
     computeIsochrones,
     findCategory,
     getModes,
     getOsmPois,
+    getRomeCodes,
+    getJobs,
     categoryToColor,
   }
 })

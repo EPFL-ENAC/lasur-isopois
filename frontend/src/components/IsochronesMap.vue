@@ -92,6 +92,15 @@ watch(
   },
 )
 
+watch(
+  () => isoService.query,
+  () => {
+    if (isoService.query && isoService.query.length > 0) {
+      onUpdateJobsLayer()
+    }
+  },
+)
+
 function onInit() {
   map.value = new Map({
     container: props.mapId,
@@ -342,6 +351,55 @@ function onUpdatePoiLayer(name: string) {
 function cutoffSecTransparency(index: number): number {
   const total = selectedModeCutoffSec.value.length
   return 0.1 + (0.7 * (total - index + 1)) / total
+}
+
+async function onUpdateJobsLayer() {
+  if (!map.value) return
+  showJobs((await loadJobs())?.offers || { type: 'FeatureCollection', features: [] })
+  // show/hide layer
+  const layerId = 'jobs-layer'
+  if (isoService.query && isoService.query.length > 0) {
+    if (map.value.getLayer(layerId)) {
+      map.value.setLayoutProperty(layerId, 'visibility', 'visible')
+    }
+  } else {
+    if (map.value.getLayer(layerId)) {
+      map.value.setLayoutProperty(layerId, 'visibility', 'none')
+    }
+  }
+}
+
+async function loadJobs() {
+  try {
+    const res = await isoService.getJobs(isoService.query.trim())
+    return res
+  } catch (error) {
+    console.error('Error fetching Jobs:', error)
+    return undefined
+  }
+}
+
+function showJobs(geojson: GeoJSON.FeatureCollection) {
+  if (!map.value) return
+  const layerId = 'jobs-layer'
+  if (map.value.getSource(layerId)) {
+    ;(map.value.getSource(layerId) as GeoJSONSource).setData(geojson)
+  } else {
+    map.value.addSource(layerId, {
+      type: 'geojson',
+      data: geojson,
+    })
+    map.value.addLayer({
+      id: layerId,
+      type: 'circle',
+      source: layerId,
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 10, 18, 5],
+        'circle-color': '#FF5722',
+        'circle-opacity': 0.8,
+      },
+    })
+  }
 }
 </script>
 

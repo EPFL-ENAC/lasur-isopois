@@ -1,3 +1,5 @@
+import type { FeatureCollection } from 'geojson'
+
 export interface Link {
   source: string
   target: string
@@ -30,4 +32,14 @@ export interface PoisParams {
 
 export interface IsochronesModes {
   [key: string]: string[]
+}
+
+export interface RomeCodeResponse {
+  codes: string[]
+}
+
+export interface JobsResponse {
+  offers: FeatureCollection
+  codes?: string[]
+  departments?: string[]
 }

@@ -31,6 +31,19 @@
 
     <q-item>
       <q-item-section>
+        <q-input
+          v-model="query"
+          :label="t('francetravail.query')"
+          :hint="t('francetravail.input_hint')"
+          filled
+          clearable
+          @keyup.enter="onLookupJobs"
+        />
+      </q-item-section>
+    </q-item>
+
+    <q-item>
+      <q-item-section>
         <q-item-label class="text-bold q-mt-md">{{ t('pois.title') }}</q-item-label>
         <q-list class="q-mt-sm">
           <template v-for="pois in isoService.poisOptions" :key="pois.value">
@@ -60,6 +73,7 @@ const isoService = useIsochrones()
 const { t } = useI18n()
 
 const location = ref<AddressLocation>({ address: '' })
+const query = ref('')
 
 const modeOptions = computed(() => {
   return ['WALK', 'BIKE', 'EBIKE', 'CAR'].map((m) => {
@@ -78,5 +92,12 @@ function onLocationUpdate(newLocation: AddressLocation) {
 
 function onPoiUpdate(category: string) {
   isoService.updatedPoiSelection = `${category}:${isoService.selectedPois[category]}`
+}
+
+async function onLookupJobs() {
+  if (query.value.trim().length === 0) {
+    return
+  }
+  isoService.query = query.value.trim()
 }
 </script>

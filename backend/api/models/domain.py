@@ -45,7 +45,7 @@ class RomeCodeResponse(BaseModel):
     codes: List[str]
 
 
-class JobResponse(BaseModel):
+class JobsResponse(BaseModel):
     offers: FeatureCollection
     codes: Optional[List[str]] = None
     departments: Optional[List[str]] = None
