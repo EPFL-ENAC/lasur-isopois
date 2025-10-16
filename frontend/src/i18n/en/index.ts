@@ -8,6 +8,7 @@ export default {
       walk: 'Walking',
       bike: 'Bicycle',
       ebike: 'E-bike',
+      car: 'Car',
     },
     categories: {
       food: 'Food',
@@ -26,4 +27,5 @@ export default {
   label_en: 'Label (EN)',
   label_fr: 'Label (FR)',
   location: 'Location',
+  no_results: 'No results found',
 }

@@ -8,6 +8,7 @@ export default {
       walk: 'La marche',
       bike: 'Le vélo',
       ebike: 'Le vélo électrique',
+      car: 'La voiture',
     },
     categories: {
       food: 'Nourriture',
@@ -26,4 +27,5 @@ export default {
   label_en: 'Libellé (EN)',
   label_fr: 'Libellé (FR)',
   location: 'Localisation',
+  no_results: 'Aucun résultat trouvé',
 }

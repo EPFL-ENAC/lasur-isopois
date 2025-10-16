@@ -135,19 +135,23 @@ async function loadIsochronesData() {
   switch (isoService.mode) {
     case 'WALK':
       mode = 'WALK'
-      cutoffSec = [600, 1200, 1800, 2400, 3600]
+      cutoffSec = [600, 1200, 1800, 2400]
       break
     case 'BIKE':
       mode = 'BICYCLE'
-      cutoffSec = [600, 1200, 1800, 2400, 3600]
+      cutoffSec = [600, 1200, 1800, 2400]
       break
     case 'EBIKE':
       mode = 'BICYCLE'
       bikeSpeed = 17
-      cutoffSec = [600, 1200, 1800, 2400, 3600]
+      cutoffSec = [600, 1200, 1800, 2400]
+      break
+    case 'CAR':
+      mode = 'CAR'
+      cutoffSec = [1200, 2400]
       break
     default:
-      cutoffSec = [300, 600, 900, 1200, 1800]
+      cutoffSec = [600, 1200, 1800]
       break
   }
   selectedModeCutoffSec.value = cutoffSec
