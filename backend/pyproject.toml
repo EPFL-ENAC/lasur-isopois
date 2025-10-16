@@ -30,5 +30,3 @@ test = [
 [tool.codespell]
 skip = 'uv.lock'
 
-[tool.setuptools]
-packages = ["api", "cache"]

@@ -39,3 +39,13 @@ class PoisData(BaseModel):
 
 class IsochroneResponse(BaseModel):
     isochrones: FeatureCollection
+
+
+class RomeCodeResponse(BaseModel):
+    codes: List[str]
+
+
+class JobResponse(BaseModel):
+    offers: FeatureCollection
+    codes: Optional[List[str]] = None
+    departments: Optional[List[str]] = None
