@@ -1,5 +1,13 @@
 import { api } from 'src/boot/api'
-import type { IsochronesParams, IsochronesData, IsochronesModes, PoisParams } from 'src/models'
+import type {
+  IsochronesParams,
+  IsochronesData,
+  IsochronesModes,
+  PoisParams,
+  RomeCodeResponse,
+  JobsResponse,
+} from 'src/models'
+import type { AxiosResponse } from 'axios'
 
 export const CATEGORY_TAGS = {
   food: {
@@ -122,6 +130,31 @@ export const CATEGORY_TAGS = {
 }
 
 export const useIsochrones = defineStore('isochrones', () => {
+  const { t } = useI18n()
+
+  const mode = ref<string>('WALK')
+  const origin = ref<[number, number]>([6.57, 46.52]) // EPFL
+  const loadingIsochrones = ref(false)
+  const selectedPois = ref<{ [key: string]: boolean }>({
+    food: false,
+    education: false,
+    service: false,
+    health: false,
+    leisure: false,
+    transport: false,
+    commerce: false,
+  })
+  const updatedPoiSelection = ref<string>('')
+  const query = ref('')
+
+  const poisOptions = computed(() =>
+    ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
+      label: t(`pois.categories.${cat}`),
+      value: cat,
+      color: categoryToColor(cat)?.name || 'grey-8',
+    })),
+  )
+
   function getModes() {
     return api
       .get('/isochrones/modes')
@@ -139,7 +172,7 @@ export const useIsochrones = defineStore('isochrones', () => {
 
   function computeIsochrones(payload: IsochronesParams) {
     return api
-      .post('/isochrones/compute', payload)
+      .post('/isochrones/_compute', payload)
       .then((res) => {
         return res.data as IsochronesData
       })
@@ -148,11 +181,56 @@ export const useIsochrones = defineStore('isochrones', () => {
       })
   }
 
-  function getPois(payload: PoisParams) {
+  async function getOsmPois(payload: PoisParams) {
     return api
-      .post('/isochrones/pois', payload)
+      .post('/osm/_pois', payload)
       .then((res) => {
         return res.data as GeoJSON.FeatureCollection
+      })
+      .catch(() => {
+        return undefined
+      })
+  }
+
+  async function getRomeCodes(query: string): Promise<RomeCodeResponse | undefined> {
+    return api
+      .get<RomeCodeResponse>('/francetravail/_codes', { params: { query } })
+      .then((res: AxiosResponse<RomeCodeResponse>) => {
+        return res.data
+      })
+      .catch(() => {
+        return undefined
+      })
+  }
+
+  async function getJobs(query: string): Promise<JobsResponse | undefined> {
+    if (!query || query.trim().length === 0) {
+      return undefined
+    }
+    // check if it is a ROME code
+    if (/^[A-Z]\d{4}$/.test(query.trim().toUpperCase())) {
+      return api
+        .get<JobsResponse>('/francetravail/_jobs', {
+          params: { rome_codes: JSON.stringify([query.trim().toUpperCase()]) },
+        })
+        .then((res: AxiosResponse<JobsResponse>) => {
+          return res.data
+        })
+        .catch(() => {
+          return undefined
+        })
+    }
+    // else search ROME codes from query
+    const rome_codes = await getRomeCodes(query)
+    if (!rome_codes || !rome_codes.codes || rome_codes.codes.length === 0) {
+      return undefined
+    }
+    return api
+      .get<JobsResponse>('/francetravail/_jobs', {
+        params: { rome_codes: JSON.stringify(rome_codes?.codes) },
+      })
+      .then((res: AxiosResponse<JobsResponse>) => {
+        return res.data
       })
       .catch(() => {
         return undefined
@@ -168,5 +246,35 @@ export const useIsochrones = defineStore('isochrones', () => {
     return 'other'
   }
 
-  return { computeIsochrones, findCategory, getModes, getPois }
+  function categoryToColor(str: string): { name: string; hex: string } | undefined {
+    const mapColors: { [key: string]: { name: string; hex: string } } = {
+      food: { name: 'red-9', hex: '#c62828' },
+      education: { name: 'purple-9', hex: '#6a1b9a' },
+      service: { name: 'blue-8', hex: '#1976d2' },
+      health: { name: 'green-13', hex: '#00e676' },
+      leisure: { name: 'light-green-9', hex: '#558b2f' },
+      transport: { name: 'yellow-8', hex: '#fbc02d' },
+      commerce: { name: 'pink-4', hex: '#f06292' },
+    }
+    if (str in mapColors && mapColors[str]) {
+      return mapColors[str]
+    }
+  }
+
+  return {
+    mode,
+    origin,
+    loadingIsochrones,
+    selectedPois,
+    updatedPoiSelection,
+    poisOptions,
+    query,
+    computeIsochrones,
+    findCategory,
+    getModes,
+    getOsmPois,
+    getRomeCodes,
+    getJobs,
+    categoryToColor,
+  }
 })

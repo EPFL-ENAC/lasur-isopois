@@ -5,7 +5,7 @@
       v-model="addressLocation.address"
       :label="label"
       :hint="hint"
-      debounce="300"
+      debounce="500"
       @keyup.enter="onSuggestAddress"
       @update:model-value="onUpdate"
       :loading="loading"
@@ -31,15 +31,6 @@
         </q-list>
       </q-menu>
     </q-input>
-    <div v-if="addressLocation.lat && addressLocation.lon" class="q-pl-sm q-mt-sm text-hint">
-      <a
-        :href="`https://www.google.com/maps/search/?api=1&query=${addressLocation.lat},${addressLocation.lon}`"
-        target="_blank"
-      >
-        <q-icon name="location_on" color="grey-10" />
-        {{ formatCoordinates(addressLocation.lat, addressLocation.lon) }}
-      </a>
-    </div>
   </div>
 </template>
 
@@ -47,7 +38,6 @@
 import { geocoderApi, toAddress } from 'src/utils/geocoder'
 import type { Feature, Point } from 'geojson'
 import type { AddressLocation } from 'src/components/models'
-import { formatCoordinates } from 'src/utils/numbers'
 
 const { t } = useI18n()
 

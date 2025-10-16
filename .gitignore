@@ -10,3 +10,4 @@ node_modules
 .secrets
 .data
 data
+backend/cache
