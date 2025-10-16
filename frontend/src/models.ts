@@ -16,7 +16,6 @@ export interface IsochronesParams {
   cutoffSec: number[]
   bikeSpeed?: number
   datetime: string
-  categories: string[]
 }
 
 export interface IsochronesData {

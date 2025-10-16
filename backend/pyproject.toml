@@ -14,6 +14,7 @@ dependencies = [
     "pydantic-settings>=2.8.0",
     "redis>=6.4.0",
     "isochrones @ git+https://github.com/EPFL-ENAC/isochrones.git@0.3.0",
+    "francetravail-pipeline @ git+https://github.com/EPFL-ENAC/LASUR-francetravail-pipeline.git@v0.2.0",
 ]
 
 [project.optional-dependencies]
@@ -28,3 +29,6 @@ test = [
 
 [tool.codespell]
 skip = 'uv.lock'
+
+[tool.setuptools]
+packages = ["api", "cache"]

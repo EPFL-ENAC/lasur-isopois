@@ -172,9 +172,9 @@ export const useIsochrones = defineStore('isochrones', () => {
       })
   }
 
-  function getPois(payload: PoisParams) {
+  function getOsmPois(payload: PoisParams) {
     return api
-      .post('/isochrones/_pois', payload)
+      .post('/osm/_pois', payload)
       .then((res) => {
         return res.data as GeoJSON.FeatureCollection
       })
@@ -217,7 +217,7 @@ export const useIsochrones = defineStore('isochrones', () => {
     computeIsochrones,
     findCategory,
     getModes,
-    getPois,
+    getOsmPois,
     categoryToColor,
   }
 })

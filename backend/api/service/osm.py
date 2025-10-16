@@ -4,7 +4,7 @@ import pandas as pd
 from geopandas import GeoDataFrame
 from isochrones import get_osm_features
 from ..cache import redis
-from ..models.isochrones import FeatureCollection
+from ..models.domain import FeatureCollection
 from ..config import config
 import hashlib
 import json
@@ -282,7 +282,7 @@ CATEGORY_TAGS = {
 }
 
 
-class PoisService:
+class OsmService:
     def __init__(self):
         self.areas = json.loads(config.CACHE_OSM_AREAS)
         self.categories = CATEGORY_TAGS.keys()

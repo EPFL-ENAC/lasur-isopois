@@ -163,7 +163,6 @@ async function loadIsochronesData() {
       bikeSpeed,
       cutoffSec,
       datetime: '2025-01-15T06:00:00Z',
-      categories: [],
     })
     .then((data) => {
       if (data?.isochrones) {
@@ -209,7 +208,7 @@ async function loadPois(categories: string[]) {
   if (!isochronesData.value || !isochronesData.value.bbox) return
   const bbox = isochronesData.value.bbox as [number, number, number, number]
   isoService.loadingIsochrones = true
-  const data = await isoService.getPois({
+  const data = await isoService.getOsmPois({
     categories,
     bbox,
   })
