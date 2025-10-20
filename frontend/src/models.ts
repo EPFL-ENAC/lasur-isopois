@@ -41,5 +41,5 @@ export interface RomeCodeResponse {
 export interface JobsResponse {
   offers: FeatureCollection
   codes?: string[]
-  departments?: string[]
+  regions?: string[]
 }

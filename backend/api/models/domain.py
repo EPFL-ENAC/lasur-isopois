@@ -48,4 +48,4 @@ class RomeCodeResponse(BaseModel):
 class JobsResponse(BaseModel):
     offers: FeatureCollection
     codes: Optional[List[str]] = None
-    departments: Optional[List[str]] = None
+    regions: Optional[List[str]] = None

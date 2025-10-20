@@ -32,4 +32,5 @@ export default {
   label_fr: 'Libellé (FR)',
   location: 'Localisation',
   no_results: 'Aucun résultat trouvé',
+  region: 'Département',
 }

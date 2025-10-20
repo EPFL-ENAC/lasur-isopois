@@ -25,10 +25,10 @@ async def get_codes(
 @router.get("/_jobs", response_model=JobsResponse, response_model_exclude_none=True)
 async def get_jobs(
     rome_codes: str,
-    departments: str = '["01", "74"]',
+    regions: str = '["01", "74"]',
     # api_key: str = Security(get_api_key),
 ) -> JobsResponse:
-    """Get available job offers to be displayed on the map, optionally filtered by ROME codes and departments."""
+    """Get available job offers to be displayed on the map, optionally filtered by ROME codes and regions."""
     # Sanity check: verify that rome_codes is a valid JSON array of strings
     codes = []
     deps = []
@@ -36,26 +36,26 @@ async def get_jobs(
         codes = json.loads(rome_codes)
         if not isinstance(codes, list) or not all(isinstance(code, str) for code in codes):
             logging.error("rome_codes is not a list of strings")
-            return JobsResponse(offers=[], codes=[], departments=[])
+            return JobsResponse(offers=[], codes=[], regions=[])
     except json.JSONDecodeError:
         logging.error("Invalid rome_codes JSON")
-        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], departments=[])
+        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
     try:
-        deps = json.loads(departments)
+        deps = json.loads(regions)
         if not isinstance(deps, list) or not all(isinstance(dep, str) for dep in deps):
-            logging.error("departments is not a list of strings")
-            return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], departments=[])
+            logging.error("regions is not a list of strings")
+            return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
     except Exception as e:
         logging.error(e, exc_info=True)
-        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], departments=[])
+        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
 
     try:
         ft_service = FranceTravailService()
         features = ft_service.search_jobs(codes, deps)
         # if geo dataframe is empty, return empty feature collection
         if features.empty:
-            return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=codes, departments=deps)
-        return JobsResponse(offers=features.__geo_interface__, codes=codes, departments=deps)
+            return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=codes, regions=deps)
+        return JobsResponse(offers=features.__geo_interface__, codes=codes, regions=deps)
     except Exception as e:
         logging.error(e, exc_info=True)
-        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], departments=[])
+        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])

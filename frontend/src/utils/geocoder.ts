@@ -46,6 +46,24 @@ let reverseController: AbortController
  * Output format: https://web.archive.org/web/20210224184722/https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
  */
 export const geocoderApi = {
+  getDetails: async (type: string, id: string) => {
+    let feature: Feature = {} as Feature
+    try {
+      const request = `${NOMINATIM_URL}/details?osmtype=${type}&osmid=${id}&format=json&polygon_geojson=1`
+      const response = await fetch(request)
+      const details = await response.json()
+      feature = {
+        type: 'Feature',
+        id,
+        geometry: details.geometry,
+        properties: details.names,
+      } as Feature
+    } catch (e: unknown) {
+      console.error(`Failed to getDetails with error: ${e}`)
+    }
+    return feature
+  },
+
   forwardGeocode: async (config: { query: string; limit: number; countries?: string[] }) => {
     let features: Feature[] = []
     try {

@@ -13,7 +13,7 @@ class Config(BaseSettings):
     CLIENT_SECRET_ROME: str = ""
     CLIENT_ID_JOBS: str = ""
     CLIENT_SECRET_JOBS: str = ""
-    DEPARTMENTS: str = '["01", "74"]'
+    REGIONS: str = '["01", "74"]'
 
 
 @lru_cache()

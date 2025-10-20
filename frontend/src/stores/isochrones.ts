@@ -8,6 +8,7 @@ import type {
   JobsResponse,
 } from 'src/models'
 import type { AxiosResponse } from 'axios'
+import { geocoderApi } from 'src/utils/geocoder'
 
 export const CATEGORY_TAGS = {
   food: {
@@ -129,6 +130,30 @@ export const CATEGORY_TAGS = {
   },
 }
 
+export interface Region {
+  id: string
+  name: string
+  osmid: string
+}
+
+export const REGIONS: Region[] = [
+  {
+    id: '01',
+    name: 'Ain',
+    osmid: '7387',
+  },
+  {
+    id: '74',
+    name: 'Haute-Savoie',
+    osmid: '7407',
+  },
+  // {
+  //   id: 'GE',
+  //   name: 'Genève',
+  //   osmid: '1702419',
+  // },
+]
+
 export const useIsochrones = defineStore('isochrones', () => {
   const { t } = useI18n()
 
@@ -146,6 +171,8 @@ export const useIsochrones = defineStore('isochrones', () => {
   })
   const updatedPoiSelection = ref<string>('')
   const query = ref('')
+  const regions = ref<GeoJSON.Feature[]>([])
+  const selectedRegion = ref<string>(REGIONS[0]?.id || '01')
 
   const poisOptions = computed(() =>
     ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
@@ -154,6 +181,33 @@ export const useIsochrones = defineStore('isochrones', () => {
       color: categoryToColor(cat)?.name || 'grey-8',
     })),
   )
+
+  async function loadRegions() {
+    regions.value = await Promise.all(
+      REGIONS.map((entry) => {
+        // fetch region details from assets
+        return fetch(`/osm/${entry.osmid}.json`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Failed to fetch region ${entry.name} from assets`)
+            }
+            return response.json()
+          })
+          .then((data) => {
+            return {
+              id: data.osm_id,
+              properties: data.names,
+              geometry: data.geometry,
+            } as GeoJSON.Feature
+          })
+          .catch((e) => {
+            console.error(`Error fetching region ${entry.name} from assets:`, e)
+            // fetch region details from OSM
+            return geocoderApi.getDetails('R', entry.osmid)
+          })
+      }),
+    )
+  }
 
   function getModes() {
     return api
@@ -207,11 +261,16 @@ export const useIsochrones = defineStore('isochrones', () => {
     if (!query || query.trim().length === 0) {
       return undefined
     }
+    const regionsParams = selectedRegion.value ? [selectedRegion.value] : REGIONS.map((r) => r.id)
+    api.defaults.params = { ...api.defaults.params, ...regionsParams }
     // check if it is a ROME code
     if (/^[A-Z]\d{4}$/.test(query.trim().toUpperCase())) {
       return api
         .get<JobsResponse>('/francetravail/_jobs', {
-          params: { rome_codes: JSON.stringify([query.trim().toUpperCase()]) },
+          params: {
+            rome_codes: JSON.stringify([query.trim().toUpperCase()]),
+            regions: JSON.stringify(regionsParams),
+          },
         })
         .then((res: AxiosResponse<JobsResponse>) => {
           return res.data
@@ -227,7 +286,10 @@ export const useIsochrones = defineStore('isochrones', () => {
     }
     return api
       .get<JobsResponse>('/francetravail/_jobs', {
-        params: { rome_codes: JSON.stringify(rome_codes?.codes) },
+        params: {
+          rome_codes: JSON.stringify(rome_codes?.codes),
+          regions: JSON.stringify(regionsParams),
+        },
       })
       .then((res: AxiosResponse<JobsResponse>) => {
         return res.data
@@ -269,6 +331,9 @@ export const useIsochrones = defineStore('isochrones', () => {
     updatedPoiSelection,
     poisOptions,
     query,
+    regions,
+    selectedRegion,
+    loadRegions,
     computeIsochrones,
     findCategory,
     getModes,

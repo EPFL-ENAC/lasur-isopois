@@ -32,4 +32,5 @@ export default {
   label_fr: 'Label (FR)',
   location: 'Location',
   no_results: 'No results found',
+  region: 'Region',
 }

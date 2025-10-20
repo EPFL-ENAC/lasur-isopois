@@ -105,6 +105,23 @@ watch(
   },
 )
 
+watch(
+  () => isoService.regions,
+  () => {
+    if (isoService.regions.length) {
+      // Update the map with the new region boundaries
+      showRegions()
+    }
+  },
+)
+
+watch(
+  () => isoService.selectedRegion,
+  () => {
+    onUpdateJobsLayer()
+  },
+)
+
 function onInit() {
   map.value = new Map({
     container: props.mapId,
@@ -131,6 +148,7 @@ function onInit() {
   map.value.on('click', (e) => {
     isoService.origin = [e.lngLat.lng, e.lngLat.lat]
   })
+  isoService.loadRegions()
 }
 
 function loadIsochrones() {
@@ -270,6 +288,37 @@ function showIsochrones(geojson: GeoJSON.FeatureCollection) {
     if (map.value?.getLayer(layerId)) {
       map.value.removeLayer(layerId)
       map.value.removeSource(layerId)
+    }
+  })
+}
+
+function showRegions() {
+  isoService.regions.forEach((geojson: GeoJSON.Feature) => {
+    if (!map.value) return
+    // make one layer for each polygon
+    const layerId = `region-layer-${geojson.id}`
+    const hasLayer = map.value.getLayer(layerId) !== undefined
+    const data = {
+      type: 'FeatureCollection',
+      features: [geojson],
+    } as GeoJSON.FeatureCollection
+    if (hasLayer) {
+      ;(map.value.getSource(layerId) as GeoJSONSource).setData(data)
+    } else {
+      map.value.addSource(layerId, {
+        type: 'geojson',
+        data,
+      })
+      map.value.addLayer({
+        id: layerId,
+        type: 'line',
+        source: layerId,
+        paint: {
+          'line-color': '#ff0000', // red
+          'line-width': 2,
+          'line-opacity': 0.5,
+        },
+      })
     }
   })
 }

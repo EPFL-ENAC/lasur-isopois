@@ -14,7 +14,7 @@ class FranceTravailService:
         self.client_secret_jobs = config.CLIENT_SECRET_JOBS
         self.rome_token = None
         self.jobs_token = None
-        self.departments = json.loads(config.DEPARTMENTS)
+        self.regions = json.loads(config.REGIONS)
 
     def authenticate_rome(self):
         self.rome_token = get_rome_access_token(
@@ -28,10 +28,10 @@ class FranceTravailService:
         self.jobs_token = get_jobs_access_token(
             self.client_id_jobs, self.client_secret_jobs)
 
-    def search_jobs(self, rome_codes: list[str], departments: list[str]) -> gpd.GeoDataFrame:
+    def search_jobs(self, rome_codes: list[str], regions: list[str]) -> gpd.GeoDataFrame:
         self.authenticate_jobs()
         offers = get_department_offers(
-            self.jobs_token, departments if departments else self.departments, ",".join(rome_codes))
+            self.jobs_token, regions if regions else self.regions, ",".join(rome_codes))
         # exclude offers without geometry or with geometry with NaN values
         offers = offers[~offers.geometry.is_empty & offers.geometry.notnull()]
         # exclude offers with invalid geometry (e.g., POINT(NaN NaN))

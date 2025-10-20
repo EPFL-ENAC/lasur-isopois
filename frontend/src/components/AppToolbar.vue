@@ -6,9 +6,18 @@
         :label="t('francetravail.query')"
         filled
         dense
-        clearable
         @keyup.enter="onLookupJobs"
-        style="max-width: 300px"
+        style="max-width: 350px"
+      />
+      <q-select
+        :label="t('region')"
+        v-model="isoService.selectedRegion"
+        :options="regionOptions"
+        filled
+        dense
+        emit-value
+        map-options
+        style="min-width: 200px"
       />
       <q-select
         :label="t('transport_mode')"
@@ -29,6 +38,8 @@
   </q-toolbar>
 </template>
 <script setup lang="ts">
+import { REGIONS, type Region } from 'src/stores/isochrones'
+
 const { t } = useI18n()
 
 const isoService = useIsochrones()
@@ -37,6 +48,12 @@ const query = ref('')
 const modeOptions = computed(() => {
   return ['WALK', 'BIKE', 'EBIKE', 'CAR'].map((m) => {
     return { label: t(`pois.mode.${m.toLowerCase()}`), value: m }
+  })
+})
+
+const regionOptions = computed(() => {
+  return REGIONS.map((region: Region) => {
+    return { label: region.name || region.id, value: region.id }
   })
 })
 
