@@ -13,7 +13,6 @@ dependencies = [
     "uvicorn>=0.35.0",
     "pydantic-settings>=2.8.0",
     "redis>=6.4.0",
-    "isochrones @ git+https://github.com/EPFL-ENAC/isochrones.git@0.3.0",
     "francetravail-pipeline @ git+https://github.com/EPFL-ENAC/LASUR-francetravail-pipeline.git@v0.2.0",
 ]
 

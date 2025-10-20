@@ -6,18 +6,14 @@ class Config(BaseSettings):
 
     API_KEYS: str
 
-    REDIS_URL: str = "redis://localhost"
-    CACHE_OSM_EXPIRY: int = 3600 * 24  # 24 hours
-    # Geneva and Leman areas by default
-    CACHE_OSM_AREAS: str = "[[5.829620,46.055305,6.420135,46.425730],[6.252594,46.293045,7.027130,46.620381]]"
+    LASUR_WS_URL: str = "https://lasur-ws-dev.epfl.ch"
+    LASUR_WS_API_KEY: str = "x5xmBCHGiatVEgagxuyn9ZEuG1TObil6zH38avBJgGg1DJrFZEpnD5iC7FXmYDGN"
 
     CLIENT_ID_ROME: str = ""
     CLIENT_SECRET_ROME: str = ""
     CLIENT_ID_JOBS: str = ""
     CLIENT_SECRET_JOBS: str = ""
     DEPARTMENTS: str = '["01", "74"]'
-
-    OTP_URL: str = "https://lasur-otp.epfl.ch"
 
 
 @lru_cache()
