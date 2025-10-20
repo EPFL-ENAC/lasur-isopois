@@ -32,30 +32,32 @@ async def get_jobs(
     # Sanity check: verify that rome_codes is a valid JSON array of strings
     codes = []
     deps = []
+    empty_response = JobsResponse(offers=FeatureCollection(
+        type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
     try:
         codes = json.loads(rome_codes)
         if not isinstance(codes, list) or not all(isinstance(code, str) for code in codes):
             logging.error("rome_codes is not a list of strings")
-            return JobsResponse(offers=[], codes=[], regions=[])
+            return empty_response
     except json.JSONDecodeError:
         logging.error("Invalid rome_codes JSON")
-        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
+        return empty_response
     try:
         deps = json.loads(regions)
         if not isinstance(deps, list) or not all(isinstance(dep, str) for dep in deps):
             logging.error("regions is not a list of strings")
-            return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
+            return empty_response
     except Exception as e:
         logging.error(e, exc_info=True)
-        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
+        return empty_response
 
     try:
         ft_service = FranceTravailService()
         features = ft_service.search_jobs(codes, deps)
         # if geo dataframe is empty, return empty feature collection
         if features.empty:
-            return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=codes, regions=deps)
+            return empty_response
         return JobsResponse(offers=features.__geo_interface__, codes=codes, regions=deps)
     except Exception as e:
         logging.error(e, exc_info=True)
-        return JobsResponse(offers=FeatureCollection(type="FeatureCollection", features=[], bbox=None), codes=[], regions=[])
+        return empty_response

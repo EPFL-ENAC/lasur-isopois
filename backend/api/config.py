@@ -6,8 +6,8 @@ class Config(BaseSettings):
 
     API_KEYS: str
 
-    LASUR_WS_URL: str = "https://lasur-ws-dev.epfl.ch"
-    LASUR_WS_API_KEY: str = "x5xmBCHGiatVEgagxuyn9ZEuG1TObil6zH38avBJgGg1DJrFZEpnD5iC7FXmYDGN"
+    LASUR_WS_URL: str = "https://lasur-ws.epfl.ch"
+    LASUR_WS_API_KEY: str
 
     CLIENT_ID_ROME: str = ""
     CLIENT_SECRET_ROME: str = ""

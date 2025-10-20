@@ -265,7 +265,6 @@ export const useIsochrones = defineStore('isochrones', () => {
     loadingJobs.value = true
     const regionsParams =
       selectedRegions.value.length > 0 ? selectedRegions.value : REGIONS.map((r) => r.id)
-    api.defaults.params = { ...api.defaults.params, ...regionsParams }
     // check if it is a ROME code
     if (/^[A-Z]\d{4}$/.test(query.trim().toUpperCase())) {
       return api
