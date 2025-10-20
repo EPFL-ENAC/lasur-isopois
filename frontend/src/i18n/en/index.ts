@@ -37,9 +37,7 @@ export default {
   address_input_hint: 'Type Enter to lookup addresses.',
   go_home: 'Go Home',
   job_offer: 'Job Offer',
-  label_en: 'Label (EN)',
-  label_fr: 'Label (FR)',
-  location: 'Location',
+  location: 'Your location',
   no_results: 'No results found',
-  region: 'Region',
+  regions: 'Districts',
 }

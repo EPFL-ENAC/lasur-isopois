@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import type { MapGeoJSONFeature } from 'maplibre-gl'
 import {
   AttributionControl,
   FullscreenControl,
@@ -155,33 +156,38 @@ function onInit() {
   map.value.on('mouseenter', 'jobs-layer', (e) => {
     if (!e.features || !e.features.length) return
     const feature = e.features[0]
-    if (feature?.geometry?.type !== 'Point') return
-    const coordinates = (feature.geometry as GeoJSON.Point).coordinates.slice()
-    const popupContent = document.createElement('div')
-    popupContent.innerHTML = `<strong>${t('job_offer')}</strong>`
-    Object.entries(feature.properties).forEach(([key, value]) => {
-      const propDiv = document.createElement('div')
-      if (key === 'URL') {
-        const link = document.createElement('a')
-        link.href = value as string
-        link.textContent = t(`francetravail.offer.${key}`)
-        link.target = '_blank'
-        link.className = 'epfl'
-        propDiv.appendChild(link)
-      } else if (key === 'dateCreation') {
-        propDiv.textContent =
-          t(`francetravail.offer.${key}`) + `: ${new Date(value as string).toLocaleDateString()}`
-      } else {
-        propDiv.textContent = t(`francetravail.offer.${key}`) + `: ${value}`
-      }
-      popupContent.appendChild(propDiv)
-    })
-
-    new Popup()
-      .setLngLat(coordinates as [number, number])
-      .setDOMContent(popupContent)
-      .addTo(map.value!)
+    showFeaturePopup(feature as MapGeoJSONFeature)
   })
+}
+
+function showFeaturePopup(feature: MapGeoJSONFeature) {
+  if (!map.value) return
+  if (feature?.geometry?.type !== 'Point') return
+  const coordinates = (feature.geometry as GeoJSON.Point).coordinates.slice()
+  const popupContent = document.createElement('div')
+  popupContent.innerHTML = `<strong>${t('job_offer')}</strong>`
+  Object.entries(feature.properties).forEach(([key, value]) => {
+    const propDiv = document.createElement('div')
+    if (key === 'URL') {
+      const link = document.createElement('a')
+      link.href = value as string
+      link.textContent = t(`francetravail.offer.${key}`)
+      link.target = '_blank'
+      link.className = 'epfl'
+      propDiv.appendChild(link)
+    } else if (key === 'dateCreation') {
+      propDiv.textContent =
+        t(`francetravail.offer.${key}`) + `: ${new Date(value as string).toLocaleDateString()}`
+    } else {
+      propDiv.textContent = t(`francetravail.offer.${key}`) + `: ${value}`
+    }
+    popupContent.appendChild(propDiv)
+  })
+
+  new Popup()
+    .setLngLat(coordinates as [number, number])
+    .setDOMContent(popupContent)
+    .addTo(map.value!)
 }
 
 function loadIsochrones() {

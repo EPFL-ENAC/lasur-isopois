@@ -15,6 +15,7 @@ declare global {
   const $toRef: typeof import('vue/macros')['$toRef']
   const CATEGORY_TAGS: typeof import('./stores/isochrones')['CATEGORY_TAGS']
   const EffectScope: typeof import('vue')['EffectScope']
+  const REGIONS: typeof import('./stores/isochrones')['REGIONS']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const computed: typeof import('vue')['computed']
   const createApp: typeof import('vue')['createApp']
@@ -99,6 +100,9 @@ declare global {
   // @ts-ignore
   export type { PiniaCustomProperties } from './stores/index'
   import('./stores/index')
+  // @ts-ignore
+  export type { Region } from './stores/isochrones'
+  import('./stores/isochrones')
 }
 
 // for vue template auto import
@@ -115,6 +119,7 @@ declare module 'vue' {
     readonly $toRef: UnwrapRef<typeof import('vue/macros')['$toRef']>
     readonly CATEGORY_TAGS: UnwrapRef<typeof import('./stores/isochrones')['CATEGORY_TAGS']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly REGIONS: UnwrapRef<typeof import('./stores/isochrones')['REGIONS']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>

@@ -1,57 +1,67 @@
 <template>
   <q-toolbar class="q-pa-sm">
-    <div class="row q-gutter-sm" style="width: 100%">
-      <q-input
-        v-model="query"
-        :label="t('francetravail.query')"
-        :disable="isoService.loadingJobs"
-        filled
-        dense
-        @keyup.enter="onLookupJobs"
-        style="width: 200px"
-      />
-      <q-select
-        :label="t('region')"
-        v-model="isoService.selectedRegions"
-        :options="regionOptions"
-        :disable="isoService.loadingJobs"
-        filled
-        dense
-        emit-value
-        map-options
-        multiple
-        style="width: 200px"
-      />
-      <q-select
-        :label="t('transport_mode')"
-        v-model="isoService.mode"
-        :disable="isoService.loadingIsochrones"
-        :options="modeOptions"
-        option-value="value"
-        option-label="label"
-        filled
-        dense
-        emit-value
-        map-options
-        hide-dropdown-icon
-        style="width: 200px"
-      />
-      <q-spinner-dots
-        v-if="isoService.loadingJobs || isoService.loadingIsochrones"
-        size="md"
-        color="primary"
-        class="q-mt-md"
-      />
+    <div class="row q-col-gutter-sm">
+      <div class="col-md-3 col-6">
+        <q-input
+          v-model="query"
+          :label="t('francetravail.query')"
+          :disable="isoService.loadingJobs"
+          filled
+          dense
+          @keyup.enter="onLookupJobs"
+          style="min-width: 200px"
+        />
+      </div>
+      <div class="col-md-3 col-6">
+        <q-select
+          :label="t('regions')"
+          v-model="isoService.selectedRegions"
+          :options="regionOptions"
+          :disable="isoService.loadingJobs"
+          filled
+          dense
+          emit-value
+          map-options
+          multiple
+          style="min-width: 200px"
+        />
+      </div>
+      <div class="col-md-3 col-6">
+        <address-input
+          v-model="location"
+          :label="t('location')"
+          @update:modelValue="onLocationUpdate"
+        />
+      </div>
+      <div class="col-md-3 col-6">
+        <q-select
+          :label="t('transport_mode')"
+          v-model="isoService.mode"
+          :disable="isoService.loadingIsochrones"
+          :options="modeOptions"
+          option-value="value"
+          option-label="label"
+          filled
+          dense
+          emit-value
+          map-options
+          hide-dropdown-icon
+          style="min-width: 200px"
+        />
+      </div>
     </div>
   </q-toolbar>
 </template>
 <script setup lang="ts">
+import AddressInput from './AddressInput.vue'
 import { REGIONS, type Region } from 'src/stores/isochrones'
+import type { AddressLocation } from 'src/components/models'
 
 const { t } = useI18n()
 
 const isoService = useIsochrones()
 const query = ref('')
+const location = ref<AddressLocation>({ address: '' })
 
 const modeOptions = computed(() => {
   return ['WALK', 'BIKE', 'EBIKE', 'CAR'].map((m) => {
@@ -64,6 +74,19 @@ const regionOptions = computed(() => {
     return { label: region.name || region.id, value: region.id }
   })
 })
+
+function onLocationUpdate(newLocation: AddressLocation) {
+  if (newLocation.lat !== undefined && newLocation.lon !== undefined) {
+    if (!isoService.origin) {
+      isoService.origin = [newLocation.lon, newLocation.lat]
+      return
+    }
+    if (newLocation.lat === isoService.origin[1] && newLocation.lon === isoService.origin[0]) {
+      return
+    }
+    isoService.origin = [newLocation.lon, newLocation.lat]
+  }
+}
 
 async function onLookupJobs() {
   if (query.value.trim().length === 0) {

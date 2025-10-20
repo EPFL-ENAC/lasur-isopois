@@ -37,9 +37,7 @@ export default {
   address_input_hint: "Tapez Entrée pour rechercher l'adresse.",
   go_home: 'Accueil',
   job_offer: "Offre d'emploi",
-  label_en: 'Libellé (EN)',
-  label_fr: 'Libellé (FR)',
-  location: 'Localisation',
+  location: 'Votre localisation',
   no_results: 'Aucun résultat trouvé',
-  region: 'Département',
+  regions: 'Départements',
 }

@@ -6,6 +6,12 @@
 
         <q-toolbar-title>
           <span class="text-primary text-bold on-right">{{ t('main.brand') }}</span>
+          <q-spinner-dots
+            v-if="isoService.loadingJobs || isoService.loadingIsochrones"
+            size="md"
+            color="primary"
+            class="q-ml-md"
+          />
         </q-toolbar-title>
 
         <q-btn-dropdown flat dense :label="locale" class="on-left">
@@ -51,6 +57,7 @@ import AppToolbar from 'src/components/AppToolbar.vue'
 import LeftDrawer from 'src/components/LeftDrawer.vue'
 
 const { locale, t } = useI18n()
+const isoService = useIsochrones()
 
 const leftDrawerOpen = ref(false)
 
