@@ -31,7 +31,7 @@ class FranceTravailService:
     def search_jobs(self, rome_codes: list[str], regions: list[str]) -> gpd.GeoDataFrame:
         self.authenticate_jobs()
         offers = get_department_offers(
-            self.jobs_token, regions if regions else self.regions, ",".join(rome_codes))
+            self.jobs_token, ",".join(regions if regions else self.regions), ",".join(rome_codes))
         # exclude offers without geometry or with geometry with NaN values
         offers = offers[~offers.geometry.is_empty & offers.geometry.notnull()]
         # exclude offers with invalid geometry (e.g., POINT(NaN NaN))

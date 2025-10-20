@@ -172,7 +172,8 @@ export const useIsochrones = defineStore('isochrones', () => {
   const updatedPoiSelection = ref<string>('')
   const query = ref('')
   const regions = ref<GeoJSON.Feature[]>([])
-  const selectedRegion = ref<string>(REGIONS[0]?.id || '01')
+  const selectedRegions = ref<string[]>(REGIONS.map((r) => r.id))
+  const loadingJobs = ref(false)
 
   const poisOptions = computed(() =>
     ['food', 'education', 'service', 'health', 'leisure', 'transport', 'commerce'].map((cat) => ({
@@ -261,7 +262,9 @@ export const useIsochrones = defineStore('isochrones', () => {
     if (!query || query.trim().length === 0) {
       return undefined
     }
-    const regionsParams = selectedRegion.value ? [selectedRegion.value] : REGIONS.map((r) => r.id)
+    loadingJobs.value = true
+    const regionsParams =
+      selectedRegions.value.length > 0 ? selectedRegions.value : REGIONS.map((r) => r.id)
     api.defaults.params = { ...api.defaults.params, ...regionsParams }
     // check if it is a ROME code
     if (/^[A-Z]\d{4}$/.test(query.trim().toUpperCase())) {
@@ -278,10 +281,14 @@ export const useIsochrones = defineStore('isochrones', () => {
         .catch(() => {
           return undefined
         })
+        .finally(() => {
+          loadingJobs.value = false
+        })
     }
     // else search ROME codes from query
     const rome_codes = await getRomeCodes(query)
     if (!rome_codes || !rome_codes.codes || rome_codes.codes.length === 0) {
+      loadingJobs.value = false
       return undefined
     }
     return api
@@ -296,6 +303,9 @@ export const useIsochrones = defineStore('isochrones', () => {
       })
       .catch(() => {
         return undefined
+      })
+      .finally(() => {
+        loadingJobs.value = false
       })
   }
 
@@ -332,7 +342,8 @@ export const useIsochrones = defineStore('isochrones', () => {
     poisOptions,
     query,
     regions,
-    selectedRegion,
+    selectedRegions,
+    loadingJobs,
     loadRegions,
     computeIsochrones,
     findCategory,

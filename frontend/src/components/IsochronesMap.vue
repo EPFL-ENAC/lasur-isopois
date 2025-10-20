@@ -116,7 +116,7 @@ watch(
 )
 
 watch(
-  () => isoService.selectedRegion,
+  () => isoService.selectedRegions,
   () => {
     onUpdateJobsLayer()
   },

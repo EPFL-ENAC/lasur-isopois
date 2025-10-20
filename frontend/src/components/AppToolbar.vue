@@ -4,25 +4,27 @@
       <q-input
         v-model="query"
         :label="t('francetravail.query')"
+        :disable="isoService.loadingJobs"
         filled
         dense
         @keyup.enter="onLookupJobs"
-        style="max-width: 350px"
+        style="width: 200px"
       />
       <q-select
         :label="t('region')"
-        v-model="isoService.selectedRegion"
+        v-model="isoService.selectedRegions"
         :options="regionOptions"
+        :disable="isoService.loadingJobs"
         filled
         dense
         emit-value
         map-options
-        style="min-width: 200px"
+        multiple
+        style="width: 200px"
       />
       <q-select
         :label="t('transport_mode')"
         v-model="isoService.mode"
-        :loading="isoService.loadingIsochrones"
         :disable="isoService.loadingIsochrones"
         :options="modeOptions"
         option-value="value"
@@ -32,7 +34,13 @@
         emit-value
         map-options
         hide-dropdown-icon
-        style="min-width: 200px"
+        style="width: 200px"
+      />
+      <q-spinner-dots
+        v-if="isoService.loadingJobs || isoService.loadingIsochrones"
+        size="md"
+        color="primary"
+        class="q-mt-md"
       />
     </div>
   </q-toolbar>
