@@ -1,8 +1,11 @@
 <template>
   <div>
     <div class="container">
-      <div :id="mapId" :style="`--t-height: ${height || '400px'}`" class="mapview" />
-      <div class="colors q-pa-sm bg-white text-grey-8 text-caption rounded-borders">
+      <div :id="mapId" class="mapview" />
+      <div
+        v-if="selectedModeCutoffSec.length"
+        class="colors q-pa-sm bg-white text-grey-8 text-caption rounded-borders"
+      >
         <div class="row q-gutter-sm">
           <div
             v-for="(cutoff, index) in selectedModeCutoffSec"
@@ -35,7 +38,6 @@ import { style } from 'src/utils/maps'
 const isoService = useIsochrones()
 
 interface Props {
-  height?: string
   zoom?: number
   mapId: string
   labelClass?: string
@@ -48,6 +50,8 @@ const map = ref<Map>()
 let marker: Marker | undefined
 const isochronesData = ref<GeoJSON.FeatureCollection>()
 const selectedModeCutoffSec = ref<number[]>([]) // in seconds
+
+const DEFAULT_CENTER: [number, number] = [6.130943093534228, 46.20157251211427] // Geneva as default
 
 onMounted(onInit)
 
@@ -104,7 +108,7 @@ watch(
 function onInit() {
   map.value = new Map({
     container: props.mapId,
-    center: isoService.origin,
+    center: isoService.origin || DEFAULT_CENTER,
     style: style,
     trackResize: true,
     zoom: props.zoom || 14,
@@ -119,12 +123,14 @@ function onInit() {
         '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
     }),
   )
-  marker = new Marker().setLngLat([isoService.origin[0], isoService.origin[1]])
-  marker.addTo(map.value)
+  if (isoService.origin) {
+    marker = new Marker().setLngLat([isoService.origin[0], isoService.origin[1]])
+    marker.addTo(map.value)
+    loadIsochrones()
+  }
   map.value.on('click', (e) => {
     isoService.origin = [e.lngLat.lng, e.lngLat.lat]
   })
-  loadIsochrones()
 }
 
 function loadIsochrones() {
@@ -135,6 +141,7 @@ function loadIsochrones() {
 async function loadIsochronesData() {
   removeIsochrones()
   removePois()
+  if (!isoService.origin) return
   isoService.loadingIsochrones = true
   const lon = isoService.origin[0]
   const lat = isoService.origin[1]
@@ -404,35 +411,20 @@ function showJobs(geojson: GeoJSON.FeatureCollection) {
 </script>
 
 <style scoped>
+.container {
+  position: relative; /* Needed for absolute children */
+  height: 100%; /* Full height of parent container */
+}
 .mapview {
   position: relative;
   z-index: 1;
-  width: var(--t-width);
-  height: var(--t-height);
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0; /* Start or end with opacity 0 for the fade effect */
-}
-
-.container {
-  position: relative; /* Needed for absolute children */
-}
-.layers {
-  position: absolute;
-  z-index: 10;
-  top: 10px;
-  left: 10px;
+  width: 100%;
+  height: 100%;
 }
 .colors {
   position: absolute;
   z-index: 10;
-  bottom: 10px;
+  top: 10px;
   left: 10px;
 }
 </style>

@@ -133,7 +133,7 @@ export const useIsochrones = defineStore('isochrones', () => {
   const { t } = useI18n()
 
   const mode = ref<string>('WALK')
-  const origin = ref<[number, number]>([6.57, 46.52]) // EPFL
+  const origin = ref<[number, number] | undefined>()
   const loadingIsochrones = ref(false)
   const selectedPois = ref<{ [key: string]: boolean }>({
     food: false,

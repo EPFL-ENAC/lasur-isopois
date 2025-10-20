@@ -1,6 +1,6 @@
 <template>
   <div>
-    <IsochronesMap :mapId="`map-iso`" :height="'95vh'" :zoom="11" />
+    <IsochronesMap :mapId="`map-iso`" :zoom="11" style="height: calc(100vh - 110px)" />
   </div>
 </template>
 

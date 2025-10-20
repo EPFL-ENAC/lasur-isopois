@@ -38,12 +38,12 @@ function getCurrentLocale(): string {
       detectedLocale = locales[0]
     }
   }
-  return detectedLocale || locales[0] || 'en'
+  return detectedLocale || locales[0] || 'fr'
 }
 
 const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
   locale: getCurrentLocale(),
-  fallbackLocale: locales[0] || 'en',
+  fallbackLocale: locales[0] || 'fr',
   globalInjection: true,
   legacy: false,
   messages,

@@ -2,42 +2,11 @@
   <q-list>
     <q-item>
       <q-item-section>
-        <q-select
-          :label="t('transport_mode')"
-          v-model="isoService.mode"
-          :loading="isoService.loadingIsochrones"
-          :disable="isoService.loadingIsochrones"
-          :options="modeOptions"
-          option-value="value"
-          option-label="label"
-          filled
-          emit-value
-          map-options
-          hide-dropdown-icon
-        />
-      </q-item-section>
-    </q-item>
-
-    <q-item>
-      <q-item-section>
         <address-input
           v-model="location"
           :label="t('location')"
           :hint="t('address_input_hint')"
           @update:modelValue="onLocationUpdate"
-        />
-      </q-item-section>
-    </q-item>
-
-    <q-item>
-      <q-item-section>
-        <q-input
-          v-model="query"
-          :label="t('francetravail.query')"
-          :hint="t('francetravail.input_hint')"
-          filled
-          clearable
-          @keyup.enter="onLookupJobs"
         />
       </q-item-section>
     </q-item>
@@ -73,16 +42,13 @@ const isoService = useIsochrones()
 const { t } = useI18n()
 
 const location = ref<AddressLocation>({ address: '' })
-const query = ref('')
-
-const modeOptions = computed(() => {
-  return ['WALK', 'BIKE', 'EBIKE', 'CAR'].map((m) => {
-    return { label: t(`pois.mode.${m.toLowerCase()}`), value: m }
-  })
-})
 
 function onLocationUpdate(newLocation: AddressLocation) {
   if (newLocation.lat !== undefined && newLocation.lon !== undefined) {
+    if (!isoService.origin) {
+      isoService.origin = [newLocation.lon, newLocation.lat]
+      return
+    }
     if (newLocation.lat === isoService.origin[1] && newLocation.lon === isoService.origin[0]) {
       return
     }
@@ -92,12 +58,5 @@ function onLocationUpdate(newLocation: AddressLocation) {
 
 function onPoiUpdate(category: string) {
   isoService.updatedPoiSelection = `${category}:${isoService.selectedPois[category]}`
-}
-
-async function onLookupJobs() {
-  if (query.value.trim().length === 0) {
-    return
-  }
-  isoService.query = query.value.trim()
 }
 </script>

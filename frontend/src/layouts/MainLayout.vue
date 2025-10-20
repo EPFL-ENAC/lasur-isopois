@@ -30,6 +30,8 @@
           <img src="EPFL.svg" height="20px" class="on-left" />
         </a>
       </q-toolbar>
+      <q-separator />
+      <AppToolbar />
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
@@ -45,6 +47,7 @@
 <script setup lang="ts">
 import { Cookies } from 'quasar'
 import { locales } from 'boot/i18n'
+import AppToolbar from 'src/components/AppToolbar.vue'
 import LeftDrawer from 'src/components/LeftDrawer.vue'
 
 const { locale, t } = useI18n()
