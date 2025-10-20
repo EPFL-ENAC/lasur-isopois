@@ -12,6 +12,12 @@ What the .env file should look like for the IsoPois backend:
 # FastAPI prefix
 PATH_PREFIX=
 API_KEYS=xxxxx
-# LASUR OTP services
-OTP_URL=https://lasur-otp-dev.epfl.ch
+# LASUR WS services
+LASUR_WS_URL=https://lasur-ws-dev.epfl.ch
+LASUR_WS_API_KEY=xxxxx
+# France Travail
+CLIENT_ID_ROME=
+CLIENT_SECRET_ROME=
+CLIENT_ID_JOBS=
+CLIENT_SECRET_JOBS=
 ```

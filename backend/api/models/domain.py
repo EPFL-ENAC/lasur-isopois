@@ -37,11 +37,15 @@ class PoisData(BaseModel):
         None, description="List of POI categories to filter")
 
 
-class IsochronePoisData(IsochroneData):
-    categories: Optional[List[str]] = Field(
-        None, description="List of POI categories to filter")
-
-
 class IsochroneResponse(BaseModel):
     isochrones: FeatureCollection
-    pois: Optional[FeatureCollection] = None
+
+
+class RomeCodeResponse(BaseModel):
+    codes: List[str]
+
+
+class JobsResponse(BaseModel):
+    offers: FeatureCollection
+    codes: Optional[List[str]] = None
+    regions: Optional[List[str]] = None

@@ -5,18 +5,14 @@ export const style: StyleSpecification = {
   sources: {
     osm: {
       type: 'raster',
-      tiles: ['https://tile.osm.ch/osm-swiss-style/{z}/{x}/{y}.png'],
+      // standard OSM tile server
+      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize: 256,
       minzoom: 0,
       maxzoom: 20,
     },
   },
   layers: [
-    // {
-    //   id: 'classic',
-    //   type: 'raster',
-    //   source: 'osm',
-    // },
     {
       id: 'light',
       type: 'raster',
@@ -25,7 +21,6 @@ export const style: StyleSpecification = {
         'raster-saturation': -0.9,
         'raster-brightness-min': 0.2,
       },
-      // layout: { visibility: 'none' },
     },
   ],
 }

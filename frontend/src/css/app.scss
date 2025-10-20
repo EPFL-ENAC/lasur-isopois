@@ -3,6 +3,10 @@ a {
   text-decoration: none;
   color: black;
 }
+a.epfl {
+  text-decoration: underline;
+  color: red;
+}
 
 a.q-markdown--link,
 a:hover.q-markdown--link,

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from logging import basicConfig, INFO, DEBUG
 from pydantic import BaseModel
 from .views.isochrones import router as isochrones_router
+from .views.osm import router as osm_router
+from .views.francetravail import router as francetravail_router
 
 basicConfig(level=DEBUG)
 
@@ -44,4 +46,16 @@ app.include_router(
     isochrones_router,
     prefix="/isochrones",
     tags=["Isochrones"],
+)
+
+app.include_router(
+    osm_router,
+    prefix="/osm",
+    tags=["OSM"],
+)
+
+app.include_router(
+    francetravail_router,
+    prefix="/francetravail",
+    tags=["FranceTravail"],
 )
