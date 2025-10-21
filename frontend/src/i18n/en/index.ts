@@ -9,6 +9,9 @@ export default {
       bike: 'Bicycle',
       ebike: 'E-bike',
       car: 'Car',
+      transit: 'Public Transport',
+      rail: 'Train',
+      bus: 'Bus',
     },
     categories: {
       food: 'Food',

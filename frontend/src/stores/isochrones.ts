@@ -171,6 +171,7 @@ export const useIsochrones = defineStore('isochrones', () => {
   })
   const updatedPoiSelection = ref<string>('')
   const query = ref('')
+  const duration = ref<number | undefined>()
   const regions = ref<GeoJSON.Feature[]>([])
   const selectedRegions = ref<string[]>(REGIONS.map((r) => r.id))
   const loadingJobs = ref(false)
@@ -340,6 +341,7 @@ export const useIsochrones = defineStore('isochrones', () => {
     updatedPoiSelection,
     poisOptions,
     query,
+    duration,
     regions,
     selectedRegions,
     loadingJobs,

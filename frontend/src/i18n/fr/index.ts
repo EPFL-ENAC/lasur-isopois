@@ -5,10 +5,13 @@ export default {
   pois: {
     title: "Points d'intérêt",
     mode: {
-      walk: 'La marche',
-      bike: 'Le vélo',
-      ebike: 'Le vélo électrique',
-      car: 'La voiture',
+      walk: 'Marche',
+      bike: 'Vélo',
+      ebike: 'Vélo électrique',
+      car: 'Voiture',
+      transit: 'Transports en commun',
+      rail: 'Train',
+      bus: 'Bus',
     },
     categories: {
       food: 'Nourriture',

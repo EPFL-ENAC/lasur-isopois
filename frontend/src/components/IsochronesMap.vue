@@ -163,6 +163,10 @@ function onInit() {
 function showFeaturePopup(feature: MapGeoJSONFeature) {
   if (!map.value) return
   if (feature?.geometry?.type !== 'Point') return
+  const popups = document.getElementsByClassName('maplibregl-popup')
+  if (popups.length) {
+    Array.from(popups).forEach((popup) => popup.remove())
+  }
   const coordinates = (feature.geometry as GeoJSON.Point).coordinates.slice()
   const popupContent = document.createElement('div')
   popupContent.innerHTML = `<strong>${t('job_offer')}</strong>`
@@ -205,26 +209,48 @@ async function loadIsochronesData() {
   let cutoffSec = []
   let mode = 'WALK'
   let bikeSpeed = 13
+  const duration =
+    isoService.duration && isoService.duration > 0
+      ? isoService.duration <= 60
+        ? isoService.duration
+        : 60 // cap at 60 minutes
+      : -1
+  let datetime = '2025-01-15T06:00:00Z'
   switch (isoService.mode) {
     case 'WALK':
       mode = 'WALK'
-      cutoffSec = [600, 1200, 1800, 2400]
+      cutoffSec = duration > 0 ? [duration * 60] : [600, 1200, 1800, 2400]
       break
     case 'BIKE':
       mode = 'BICYCLE'
-      cutoffSec = [600, 1200, 1800, 2400]
+      cutoffSec = duration > 0 ? [duration * 60] : [600, 1200, 1800, 2400]
       break
     case 'EBIKE':
       mode = 'BICYCLE'
       bikeSpeed = 17
-      cutoffSec = [600, 1200, 1800, 2400]
+      cutoffSec = duration > 0 ? [duration * 60] : [600, 1200, 1800, 2400]
       break
     case 'CAR':
       mode = 'CAR'
-      cutoffSec = [1200, 2400]
+      cutoffSec = duration > 0 ? [duration * 60] : [1200, 2400]
+      break
+    case 'TRANSIT':
+      mode = 'TRANSIT'
+      cutoffSec = duration > 0 ? [duration * 60] : [1200, 2400, 3600]
+      datetime = '2023-08-09T07:30:00Z'
+      break
+    case 'RAIL':
+      mode = 'RAIL'
+      cutoffSec = duration > 0 ? [duration * 60] : [1200, 2400, 3600]
+      datetime = '2023-08-09T07:30:00Z'
+      break
+    case 'BUS':
+      mode = 'BUS'
+      cutoffSec = duration > 0 ? [duration * 60] : [1200, 2400, 3600]
+      datetime = '2023-08-09T07:30:00Z'
       break
     default:
-      cutoffSec = [600, 1200, 1800]
+      cutoffSec = duration > 0 ? [duration * 60] : [600, 1200, 1800]
       break
   }
   selectedModeCutoffSec.value = cutoffSec
@@ -235,7 +261,7 @@ async function loadIsochronesData() {
       mode,
       bikeSpeed,
       cutoffSec,
-      datetime: '2025-01-15T06:00:00Z',
+      datetime,
     })
     .then((data) => {
       if (data?.isochrones) {
@@ -353,9 +379,9 @@ function showRegions() {
         type: 'line',
         source: layerId,
         paint: {
-          'line-color': '#ff0000', // red
-          'line-width': 2,
-          'line-opacity': 0.5,
+          'line-color': '#0000ff', // blue
+          'line-width': 3,
+          'line-opacity': 0.3,
         },
       })
     }

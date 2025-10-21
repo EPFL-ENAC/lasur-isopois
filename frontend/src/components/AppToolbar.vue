@@ -49,6 +49,18 @@
           style="min-width: 200px"
         />
       </div>
+      <!-- div class="col-md-3 col-6">
+        <q-input
+          v-model.number="isoService.duration"
+          type="number"
+          :label="t('max_duration_minutes')"
+          :disable="isoService.loadingIsochrones"
+          filled
+          dense
+          @keyup.enter="onLocationUpdate"
+          style="min-width: 200px"
+        />
+      </div -->
     </div>
   </q-toolbar>
 </template>
@@ -64,7 +76,7 @@ const query = ref('')
 const location = ref<AddressLocation>({ address: '' })
 
 const modeOptions = computed(() => {
-  return ['WALK', 'BIKE', 'EBIKE', 'CAR'].map((m) => {
+  return ['WALK', 'BIKE', 'EBIKE', 'CAR', 'TRANSIT', 'RAIL', 'BUS'].map((m) => {
     return { label: t(`pois.mode.${m.toLowerCase()}`), value: m }
   })
 })
