@@ -177,13 +177,17 @@ function onInit() {
         const feature = e.features[0]
         showFeaturePopup(feature as MapGeoJSONFeature)
       })
+      // on map click excluding jobs-layer
+      map.value.on('click', (e) => {
+        const features = map.value?.queryRenderedFeatures(e.point, { layers: ['jobs-layer'] })
+        if (features && features.length > 0) {
+          return
+        }
+        isoService.origin = [e.lngLat.lng, e.lngLat.lat]
+      })
     }
     // Listen for location updates
     geolocate.on('geolocate', (position) => {
-      console.log('Geolocation changed:')
-      console.log('Latitude:', position.coords.latitude)
-      console.log('Longitude:', position.coords.longitude)
-      console.log('Accuracy:', position.coords.accuracy)
       const lon = position.coords.longitude
       const lat = position.coords.latitude
       isoService.origin = [lon, lat]
