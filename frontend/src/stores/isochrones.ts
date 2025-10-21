@@ -143,10 +143,36 @@ export const REGIONS: Region[] = [
     osmid: '7387',
   },
   {
+    id: '38',
+    name: 'Isère',
+    osmid: '7437',
+  },
+  {
+    id: '39',
+    name: 'Jura',
+    osmid: '7460',
+  },
+  {
+    id: '69',
+    name: 'Rhône',
+    osmid: '7378',
+  },
+  {
+    id: '71',
+    name: 'Saône-et-Loire',
+    osmid: '7397',
+  },
+  {
+    id: '73',
+    name: 'Savoie',
+    osmid: '7425',
+  },
+  {
     id: '74',
     name: 'Haute-Savoie',
     osmid: '7407',
   },
+
   // {
   //   id: 'GE',
   //   name: 'Genève',
@@ -173,7 +199,7 @@ export const useIsochrones = defineStore('isochrones', () => {
   const query = ref('')
   const duration = ref<number | undefined>()
   const regions = ref<GeoJSON.Feature[]>([])
-  const selectedRegions = ref<string[]>(REGIONS.map((r) => r.id))
+  const selectedRegions = ref<string[]>(['01', '74'])
   const loadingJobs = ref(false)
 
   const poisOptions = computed(() =>

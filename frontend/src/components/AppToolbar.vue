@@ -23,6 +23,7 @@
           emit-value
           map-options
           multiple
+          max-values="5"
           style="min-width: 200px"
         />
       </div>
