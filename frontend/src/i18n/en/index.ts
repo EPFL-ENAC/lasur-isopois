@@ -37,10 +37,12 @@ export default {
     },
   },
   transport_mode: 'Transport Mode',
+  address_search: 'Address Search',
   address_input_hint: 'Type Enter to lookup addresses.',
   go_home: 'Go Home',
   job_offer: 'Job Offer',
   location: 'Your location',
+  max_duration_minutes: 'Max. duration (minutes)',
   no_results: 'No results found',
   regions: 'Districts',
 }

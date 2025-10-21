@@ -5,6 +5,7 @@
       dense
       v-model="addressLocation.address"
       :label="label"
+      :hint="hint"
       debounce="500"
       @keyup.enter="onSuggestAddress"
       @update:model-value="onUpdate"
@@ -44,6 +45,7 @@ const { t } = useI18n()
 interface Props {
   modelValue: AddressLocation | undefined
   label?: string
+  hint?: string
   required?: boolean
 }
 

@@ -37,10 +37,12 @@ export default {
     },
   },
   transport_mode: 'Mode de transport',
+  address_search: "Recherche d'adresse",
   address_input_hint: "Tapez Entrée pour rechercher l'adresse.",
   go_home: 'Accueil',
   job_offer: "Offre d'emploi",
   location: 'Votre localisation',
+  max_duration_minutes: 'Durée max. (minutes)',
   no_results: 'Aucun résultat trouvé',
   regions: 'Départements',
 }

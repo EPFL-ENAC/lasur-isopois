@@ -61,7 +61,7 @@ const DEFAULT_CENTER: [number, number] = [6.130943093534228, 46.20157251211427] 
 onMounted(onInit)
 
 watch(
-  () => [isoService.origin, isoService.mode],
+  () => [isoService.origin, isoService.mode, isoService.duration],
   () => {
     let toUpdate = false
     if (
@@ -245,11 +245,7 @@ async function loadIsochronesData() {
   let mode = 'WALK'
   let bikeSpeed = 13
   const duration =
-    isoService.duration && isoService.duration > 0
-      ? isoService.duration <= 60
-        ? isoService.duration
-        : 60 // cap at 60 minutes
-      : -1
+    isoService.duration && isoService.duration > 0 ? Math.min(isoService.duration, 90) : -1
   let datetime = '2025-01-15T06:00:00Z'
   switch (isoService.mode) {
     case 'WALK':
