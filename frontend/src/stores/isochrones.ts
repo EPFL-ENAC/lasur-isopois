@@ -183,7 +183,7 @@ export const REGIONS: Region[] = [
 export const useIsochrones = defineStore('isochrones', () => {
   const { t } = useI18n()
 
-  const mode = ref<string>('WALK')
+  const mode = ref<string>('TRANSIT')
   const origin = ref<[number, number] | undefined>()
   const loadingIsochrones = ref(false)
   const selectedPois = ref<{ [key: string]: boolean }>({

@@ -28,6 +28,7 @@ import type { MapGeoJSONFeature } from 'maplibre-gl'
 import {
   AttributionControl,
   FullscreenControl,
+  GeolocateControl,
   Map,
   Marker,
   NavigationControl,
@@ -35,9 +36,11 @@ import {
   type GeoJSONSource,
 } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { useQuasar } from 'quasar'
 import { style } from 'src/utils/maps'
 
 const isoService = useIsochrones()
+const $q = useQuasar()
 
 interface Props {
   zoom?: number
@@ -134,6 +137,12 @@ function onInit() {
     attributionControl: false,
   })
   map.value.addControl(new NavigationControl({}))
+  // Add Geolocate Control and callback when location is found
+  const geolocate = new GeolocateControl({
+    positionOptions: { enableHighAccuracy: true },
+    trackUserLocation: false,
+  })
+  map.value.addControl(geolocate)
   map.value.addControl(new FullscreenControl({}))
   map.value.addControl(
     new AttributionControl({
@@ -142,21 +151,43 @@ function onInit() {
         '© <a href="https://www.francetravail.fr">France Travail</a>, <a href="https://www.epfl.ch/labs/lasur/">EPFL Lasur</a>, <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
     }),
   )
-  if (isoService.origin) {
-    marker = new Marker().setLngLat([isoService.origin[0], isoService.origin[1]])
-    marker.addTo(map.value)
-    loadIsochrones()
-  }
-  map.value.on('click', (e) => {
-    isoService.origin = [e.lngLat.lng, e.lngLat.lat]
-  })
-  isoService.loadRegions()
 
-  // show popup on hovering jobs-layer points
-  map.value.on('mouseenter', 'jobs-layer', (e) => {
-    if (!e.features || !e.features.length) return
-    const feature = e.features[0]
-    showFeaturePopup(feature as MapGeoJSONFeature)
+  map.value.on('load', () => {
+    if (!map.value) return
+    if (isoService.origin) {
+      marker = new Marker().setLngLat([isoService.origin[0], isoService.origin[1]])
+      marker.addTo(map.value)
+      loadIsochrones()
+    }
+    isoService.loadRegions()
+
+    if ($q.screen.gt.sm) {
+      // show popup on hovering jobs-layer points
+      map.value.on('mouseenter', 'jobs-layer', (e) => {
+        if (!e.features || !e.features.length) return
+        const feature = e.features[0]
+        showFeaturePopup(feature as MapGeoJSONFeature)
+      })
+      map.value.on('click', (e) => {
+        isoService.origin = [e.lngLat.lng, e.lngLat.lat]
+      })
+    } else {
+      map.value.on('click', 'jobs-layer', (e) => {
+        if (!e.features || !e.features.length) return
+        const feature = e.features[0]
+        showFeaturePopup(feature as MapGeoJSONFeature)
+      })
+    }
+    // Listen for location updates
+    geolocate.on('geolocate', (position) => {
+      console.log('Geolocation changed:')
+      console.log('Latitude:', position.coords.latitude)
+      console.log('Longitude:', position.coords.longitude)
+      console.log('Accuracy:', position.coords.accuracy)
+      const lon = position.coords.longitude
+      const lat = position.coords.latitude
+      isoService.origin = [lon, lat]
+    })
   })
 }
 
